@@ -71,7 +71,7 @@ const UPSCALE_FACTOR: u64 = 4;
 
 //
 // ----------------------GFPGAN--------------------------
-pub fn run_gfpgan() -> anyhow::Result<()> {
+pub fn run_gfpgan() -> anyhow::Result<bool> {
     // runs GFPGAN on the images in path GFPGANPATH/inputs/whole_images which is where the bot will automatically download them to
     /*  Usage: python inference_gfpgan.py -i inputs/whole_imgs -o results -v 1.3 -s 2 [options]...
     -h                   show this help
@@ -98,11 +98,7 @@ pub fn run_gfpgan() -> anyhow::Result<()> {
         .arg("1.3")
         .arg("-s") // Upscale:
         .arg(UPSCALE_FACTOR.to_string())
-        //.output()?;
-        .status()?; // This lets us block until the Command is done .output() may be another more... information rich option
+        .status()?;
 
-    // println!("{} FINISHED a restore.", Utc::now());
-    // println!("{:#?}", python);
-    assert!(python.success()); // NOTE: this won't crash the app
-    Ok(())
+    Ok(python.success())
 }

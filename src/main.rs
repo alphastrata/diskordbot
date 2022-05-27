@@ -45,6 +45,7 @@ impl EventHandler for Handler {
             return;
         }
 
+        let mut workhandle = utils::WorkHandle::init();
         let _ = utils::process_downloadables(
             &message,
             &context,
@@ -52,6 +53,7 @@ impl EventHandler for Handler {
             MAXIMUM_INPUT_RESOLUTION,
             GFPGAN_PATH,
             ESRGAN_PATH,
+            &mut workhandle,
         )
         .await;
 
