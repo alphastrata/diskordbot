@@ -6,12 +6,6 @@ use serenity::model::channel::Message;
 use serenity::model::id::ChannelId;
 use std::fs;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
-
-enum Workflag {
-    Working,
-    Available,
-}
 
 #[allow(non_snake_case)]
 pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, context: &Context) {
@@ -27,20 +21,6 @@ pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, conte
         let _ = message.reply_mention(&context, " You killed me...").await;
         panic!();
     }
-}
-/*
-pub async fn check_queue(workflag: Workflag, worklist: Arc<Mutex<Vec<String>>>, newjob: String) {
-is newjob in worklist?
-   match workflag {
-       Workflag::Working => worklist.lock().unwrap().append(newjob),
-       Workflag::Available => {//TODO: run process}
-   };
-are we working?
-   todo!();
-}
-*/
-fn update_queue(worklist: &Vec<String>) {
-    todo!();
 }
 #[allow(non_snake_case)] // Coz it complains about the const variables -- which by convention are uppercase?
 pub async fn process_downloadables(
@@ -83,8 +63,6 @@ pub async fn process_downloadables(
                     if check_attachment_and_download(message, &photo, &filename, &content)
                         .unwrap_or(false)
                     {
-                        // TODO: add to worklist.
-                        // Acknowledge download
                         let _ = message
                             .reply_mention(
                                 &context,
@@ -94,37 +72,29 @@ pub async fn process_downloadables(
                                 ),
                             )
                             .await;
-                        // TODO: check if we're working via the workflag
-
-                        // Run some Gans
-                        if message.content.contains("superres") {
-                            // check workflag
-                            gans::run_esrgan(gans::Model::X4plus).expect("Failed to run ESRGAN");
-                        } else if message.content.contains("restore") {
-                            // check workflag
-                            //check_queue(worklist)
-
-                            gans::run_gfpgan().expect("Failed to run GFPGAN");
-                        } else {
-                            return;
-                        };
-
-                        let restored_imgs =
-                            format!("{}results/restored_imgs/{}", GFPGAN_PATH, filename);
-
-                        // Get it back to them
-                        return_file(
-                            vec![&restored_imgs[..]], // NOTE: this is pretty nasty ...
-                            message.channel_id,
-                            &filename,
-                            context,
-                            message,
-                            GFPGAN_PATH,
-                            ESRGAN_PATH,
-                        )
-                        .await;
                     }
+                    if message.content.contains("restore") {
+                        gans::run_gfpgan().expect("Failed to run GFPGAN");
+                    } else {
+                        return;
+                    };
+
+                    let restored_imgs =
+                        format!("{}results/restored_imgs/{}", GFPGAN_PATH, filename);
+
+                    // Get it back to them
+                    return_file(
+                        vec![&restored_imgs[..]],
+                        message.channel_id,
+                        &filename,
+                        context,
+                        message,
+                        GFPGAN_PATH,
+                        ESRGAN_PATH,
+                    )
+                    .await;
                 }
+
                 // Communicate failure to download files
                 Err(why) => {
                     println!("Error downloading attachment: {:?}", why);
@@ -160,6 +130,7 @@ fn check_attachment_and_download(
     content: &Vec<u8>,
 ) -> anyhow::Result<bool> {
     // returns true if the file was downloaded, false if the file already existing on disk
+    // we do not run if the file already exists
     if Path::new(&photo).is_file() {
         println!(
             "{} Duplicate, skipping as I already have this image {:#?}",
@@ -226,7 +197,7 @@ async fn return_file(
     println!("{} Awaiting script to finish work...", Utc::now());
 
     if std::path::Path::new(&photo).is_file() {
-        let _response = channel_id // ASSUMPTION: this channel_id will always be taken from the sender's Message so no fear of sending the wrong restored image to the wrong user etc...
+        let _response = channel_id
             .send_files(&context, paths, |m| {
                 m.content(format!("restored_{}", filename))
             })
@@ -238,10 +209,7 @@ async fn return_file(
             let _ = cleanup(GFPGAN_PATH, "GFP");
         }
     } else {
-        println!(
-            "{} File was not ready...",
-            Utc::now() //TODO: fix this sleep shit
-        );
+        println!("{} File was not ready...", Utc::now());
 
         std::thread::sleep(std::time::Duration::from_secs(5)); // #BADHAX
 
@@ -255,4 +223,12 @@ async fn return_file(
             ESRGAN_PATH,
         );
     }
+}
+
+pub(crate) fn read_token_txt(p: String) -> Result<String, std::io::Error> {
+    let contents = match fs::read_to_string(p) {
+        Ok(it) => it,
+        Err(err) => return Err(err),
+    };
+    Ok(contents)
 }

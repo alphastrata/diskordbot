@@ -5,65 +5,39 @@
 use chrono::Utc;
 use std::process::Command;
 
+use crate::GFPGAN_PATH;
+
 const UPSCALE_FACTOR: u64 = 4;
-#[allow(dead_code)] // supressing compiler warnings from model's we're not currently using
-pub enum Model {
-    // Model options:
-    //     ESRGAN_SRx4_DF2KOST_official-ff704c30.pth
-    //     RealESRGAN_x2plus.pth  NOTE: Best for larger than 1000x1000 sizes
-    //     RealESRGAN_x2plus_netD.pth
-    //     RealESRGAN_x4plus.pth  NOTE: Best for smaller than 1000x1000 sizes
-    //     RealESRGAN_x4plus_anime_6B.pth NOTE: Best for line drawings
-    //     RealESRGAN_x4plus_netD.pth
-    //     RealESRNet_x4plus.pth
-    X2plus,
-    X4plus,
-    X4plusAnime,
-}
 
-pub fn run_esrgan(model: Model) -> anyhow::Result<()> {
-    // runs ESRGAN on the images in its path ../inputs/
-    println!("{} QUEUED a superres.", Utc::now());
-    // should run equivalent to this:
-    // ppython inference_realesrgan.py --model_path experiments/pretrained_models/RealESRGAN_x4plus.pth --input inputs --face_enhance
-
-    #[allow(unused_must_use)]
-    // as above, most of the models are not use, so we're silencing the compiler
-    let model = match model {
-        X2plus => "RealESRGAN_x2plus.pth",
-        X4plus => "RealESRGAN_x4plus.pth",
-        X4plusAnime => "RealESRGAN_x4plus_anime_6B.pth",
-        _ => "RealESRNet_x4plus .pth",
-    };
-    let python = Command::new("python3")
-        .current_dir("/home/jer/Documents/ESRGAN")
-        .arg("inference_realesrgan.py")
-        .arg("--model_path")
-        .arg(format!("experiments/pretrained_models/{}", model))
-        .arg("--input")
-        .arg("inputs")
-        .arg("--face_enhance") // TODO: work out whether or not a face is detected then run or disable this flag?
-        .status()?;
-    assert!(python.success());
-
-    Ok(())
-}
-
+// ----------------------GFPGAN--------------------------
 pub fn run_gfpgan() -> anyhow::Result<()> {
-    // runs GFPGAN on the images in its path .../inputs/whole_images/
+    // runs GFPGAN on the images in path GFPGANPATH/inputs/whole_images which is where the bot will automatically download them to
+    /*  Usage: python inference_gfpgan.py -i inputs/whole_imgs -o results -v 1.3 -s 2 [options]...
+    -h                   show this help
+    -i input             Input image or folder. Default: inputs/whole_imgs
+    -o output            Output folder. Default: results
+    -v version           GFPGAN model version. Option: 1 | 1.2 | 1.3. Default: 1.3
+    -s upscale           The final upsampling scale of the image. Default: 2
+    -bg_upsampler        background upsampler. Default: realesrgan
+    -bg_tile             Tile size for background sampler, 0 for no tile during testing. Default: 400
+    -suffix              Suffix of the restored faces
+    -only_center_face    Only restore the center face
+    -aligned             Input are aligned faces
+    -ext                 Image extension. Options: auto | jpg | png, auto means using the same extension as inputs. Default: auto
+    */
     println!("{} QUEUED a restore.", Utc::now());
-    //python inference_gfpgan.py --upscale 2 --test_path inputs/whole_imgs --save_root results
-    let python = Command::new("python3")
-        .current_dir("/home/jer/Documents/GFPGAN")
+    let python = Command::new("python")
+        .current_dir(GFPGAN_PATH)
         .arg("inference_gfpgan.py")
-        .arg("--upscale")
-        .arg(UPSCALE_FACTOR.to_string())
-        .arg("--test_path")
+        .arg("-i") // input:
         .arg("inputs/whole_imgs")
-        .arg("--save_root")
+        .arg("-o") // output:
         .arg("results")
+        .arg("-v") // version:
+        .arg("1.3")
+        .arg("-s") // Upscale:
+        .arg(UPSCALE_FACTOR.to_string())
         .status()?; // This lets us block until the Command is done .output() may be another more... information rich option
-
     assert!(python.success()); // NOTE: this won't crash the app
     Ok(())
 }
