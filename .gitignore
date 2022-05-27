@@ -11,8 +11,7 @@ Cargo.lock
 client_secret.txt
 
 GFPGAN
-snippets.rs
-.notes
+ESRGAN
 *.jpg
 *.png
 *.tiff
