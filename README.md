@@ -12,6 +12,8 @@ A discord bot for GFPGAN, and other image editing GANS.
 
 - Install [GFPGAN](https://lmgtfy.app/?q=gfpgan).
 - Install Discord (if you don't have it already), you'll also need a token to get your bot into servers, you can google this.
+- Install [ESRGAN](https://github.com/xinntao/Real-ESRGAN) You can download executable files for Intel/AMD/Nvidia GPU: <a href="https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-windows.zip">Windows</a>, <a href="https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-ubuntu.zip">Linux</a>, <a href="https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.5.0/realesrgan-ncnn-vulkan-20220424-macos.zip">MacOS</a>
+
 - [Get Rust](www.rust-lang.org).
 - Clone _this_ repo.
 - `cd diskordbot`.
@@ -26,8 +28,6 @@ A discord bot for GFPGAN, and other image editing GANS.
 ## TODO:
 
 - [] the `impl` for `EventHandler` is starting to get a lil wild and sizey.
-- [] add the new ESRGAN vulkan standalone app & have this call that
 - [] can the `build.rs` install GFPGAN and `wget` the new ESRGAN for them?
 - [] currently two files sharing a filename will prevent the bot from downloading... edgecasey but shouldhandle.
 - [] no progress feedback is given... edgecasey as the smaller, shittier, older images which this GFPGAN is actually good at working on take less than a second on my rig...
-- [] need to implement a queue, currently spamming the bot will make it crash #cozpythoncozcuda

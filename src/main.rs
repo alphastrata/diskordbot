@@ -1,18 +1,17 @@
 /*
-
-╭━━━┳━━━┳━━━┳━━━┳━━━┳━╮╱╭┳╮╱╱╱╱╭╮
-┃╭━╮┃╭━━┫╭━╮┃╭━╮┃╭━╮┃┃╰╮┃┃┃╱╱╱╭╯╰╮
-┃┃╱╰┫╰━━┫╰━╯┃┃╱╰┫┃╱┃┃╭╮╰╯┃╰━┳━┻╮╭╯
-┃┃╭━┫╭━━┫╭━━┫┃╭━┫╰━╯┃┃╰╮┃┃╭╮┃╭╮┃┃
-┃╰┻━┃┃╱╱┃┃╱╱┃╰┻━┃╭━╮┃┃╱┃┃┃╰╯┃╰╯┃╰╮
-╰━━━┻╯╱╱╰╯╱╱╰━━━┻╯╱╰┻╯╱╰━┻━━┻━━┻━╯
+     ___     __            __        __
+ ___/ (_)__ / /_____  ____/ /  ___  / /_
+/ _  / (_-</  '_/ _ \/ __/ _ \/ _ \/ __/
+\_,_/_/___/_/\_\\___/_/ /_.__/\___/\__/
 
 */
+
 const GFPGAN_BOT_ID: u64 = 889476441253761044; // These are harmless and unique, there is no danger in making them public.
-const MAXIMUM_INPUT_RESOLUTION: u64 = 2560;
+const MAXIMUM_INPUT_RESOLUTION: u64 = 2560 * 5;
 
 const GFPGAN_PATH: &str = "./GFPGAN/";
 const ESRGAN_PATH: &str = "./ESRGAN/"; //NOTE: not in use
+const ESRGAN_EXECUTABLE: &str = "./ESRGAN/realesrgan-ncnn-vulkan.exe";
 
 mod gans;
 mod utils;
@@ -47,7 +46,7 @@ impl EventHandler for Handler {
         }
 
         let mut workhandle = utils::WorkHandle::init();
-        let _ = utils::process_downloadables(
+        let _ = utils::run(
             &message,
             &context,
             &GFPGAN_BOT_ID,

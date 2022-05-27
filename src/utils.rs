@@ -53,7 +53,7 @@ pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, conte
     }
 }
 #[allow(non_snake_case)] // Coz it complains about the const variables -- which by convention are uppercase?
-pub async fn process_downloadables(
+pub async fn run(
     message: &Message,
     context: &Context,
     GFPGAN_BOT_ID: &u64,
@@ -99,7 +99,8 @@ pub async fn process_downloadables(
                             .reply_mention(
                                 &context,
                                 format!(
-                                    "I have your file `{}` and will return it in about 10 seconds.",
+                                    "I have your file `{}` and will return it in about 10 seconds.\n
+                                    Please note, for 'superres' calls that if you don't have Nitro I'll be unable to send your file back!",
                                     filename
                                 ),
                             )
@@ -115,8 +116,14 @@ pub async fn process_downloadables(
                                 workhandle.worklist.lock().unwrap().len()
                             );
                         }
+                        //
+                        //NOTE CLEAN THIS UP! into a match with pretty calls?
                         if message.content.contains("superres") {
-                            todo!();
+                            let top_job = workhandle.worklist.lock().unwrap().pop().unwrap();
+                            if gans::run_esrgan(top_job).expect("Failed to run ESRGAN") {
+                                *workhandle.available.lock().unwrap() = true;
+                                workhandle.worklist.lock().unwrap().pop();
+                            }
                         }
 
                         if message.content.contains("restore") {
