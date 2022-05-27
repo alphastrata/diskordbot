@@ -130,6 +130,9 @@ pub async fn process_downloadables(
                                 workhandle.worklist.lock().unwrap().len()
                             );
                         }
+                        if message.content.contains("superres") {
+                            todo!();
+                        }
 
                         if message.content.contains("restore") {
                             let top_job = workhandle.worklist.lock().unwrap().pop().unwrap();
