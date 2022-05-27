@@ -9,8 +9,8 @@
 const GFPGAN_BOT_ID: u64 = 889476441253761044;
 const MAXIMUM_INPUT_RESOLUTION: u64 = 2560;
 
-const GFPGAN_PATH: &str = "~/Documents/GFPGAN/";
-const ESRGAN_PATH: &str = "~/Documents/ESRGAN/";
+const GFPGAN_PATH: &str = "./GFPGAN/";
+const ESRGAN_PATH: &str = "./ESRGAN/";
 
 mod gans;
 mod utils;
@@ -67,10 +67,18 @@ impl EventHandler for Handler {
 
 #[tokio::main]
 async fn main() {
+    let key = "DISCORD_TOKEN";
+    // read the token from client_secret.txt
+    let client_secret_path = "client_secret.txt";
+    let token =
+        utils::read_token_txt(client_secret_path.trim().to_string()).expect("Unable to read token");
+    env::set_var(key, token);
+    let intents = GatewayIntents::DIRECT_MESSAGES | GatewayIntents::GUILD_MESSAGES;
+    //| GatewayIntents::MESSAGE_CONTENT;
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
     let mut _worklist: Vec<String>;
-    let mut client = Client::builder(token)
+    let mut client = Client::builder(&token, intents)
         .event_handler(Handler)
         .application_id(889476441253761044)
         .await

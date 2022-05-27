@@ -10,16 +10,17 @@ A discord bot for GFPGAN
 
 ## USAGE:
 
-- Install GFPGAN, [LMGTFY](https://lmgtfy.app/?q=gfpgan).
+- Install [GFPGAN](https://lmgtfy.app/?q=gfpgan).
+- Install Discord (if you don't have it already), you'll also need a token to get your bot into servers, you can google this.
 - [Get Rust](www.rust-lang.org).
-- Clone this repo.
+- Clone _this_ repo.
 - `cd diskordbot`.
 - Check the paths are appropriate to wherever you installed GFPGAN to (currently hardcoded, sorry).
+- make sure you have a token in your `PATH`, google this for your system.
 - `cargo build --release`.
 - `./target/release/diskortbot`.
 - make sure it's invited to the appropriate server.
-- make sure the appropriate user and channel IDs are set (currently hardcoded, sorry).
-- make sure you have a token in your `PATH`... not even going to post a LMGTFY this time.
+- make sure the appropriate user and channel IDs you can set these yourself in the `main.rs` file.
 
 ## TODO:
 

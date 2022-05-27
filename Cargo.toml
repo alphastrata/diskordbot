@@ -6,7 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = "1.0.42"
 chrono = "0.4.19"
-discord = { git = "https://github.com/SpaceManiac/discord-rs" }
 futures = "0.3.15"
 image = "0.23.14"
 serenity = {version="*",  default-features = false, features = ["client", "gateway", "rustls_backend", "model", "unstable_discord_api"] }

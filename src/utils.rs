@@ -6,12 +6,13 @@ use serenity::model::channel::Message;
 use serenity::model::id::ChannelId;
 use std::fs;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+// use std::sync::{Arc, Mutex};
 
-enum Workflag {
-    Working,
-    Available,
-}
+// TODO: mutex this bad boy and set it to on when we're running a gan, if the .output() call on the gan returns a 0 we succeded, if the file has been returned we can flip this back over
+// enum Workflag {
+//     Working,
+//     Available,
+// }
 
 #[allow(non_snake_case)]
 pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, context: &Context) {
@@ -28,6 +29,7 @@ pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, conte
         panic!();
     }
 }
+//TODO: implement this properly
 /*
 pub async fn check_queue(workflag: Workflag, worklist: Arc<Mutex<Vec<String>>>, newjob: String) {
 is newjob in worklist?
@@ -39,9 +41,9 @@ are we working?
    todo!();
 }
 */
-fn update_queue(worklist: &Vec<String>) {
-    todo!();
-}
+// fn update_queue(worklist: &Vec<String>) {
+//     todo!();
+// }
 #[allow(non_snake_case)] // Coz it complains about the const variables -- which by convention are uppercase?
 pub async fn process_downloadables(
     message: &Message,
@@ -94,12 +96,13 @@ pub async fn process_downloadables(
                                 ),
                             )
                             .await;
-                        // TODO: check if we're working via the workflag
 
+                        // TODO: check if we're working via the workflag
                         // Run some Gans
                         if message.content.contains("superres") {
                             // check workflag
-                            gans::run_esrgan(gans::Model::X4plus).expect("Failed to run ESRGAN");
+                            //gans::run_esrgan(gans::Model::X4plus).expect("Failed to run ESRGAN");
+                            continue;
                         } else if message.content.contains("restore") {
                             // check workflag
                             //check_queue(worklist)
@@ -238,11 +241,9 @@ async fn return_file(
             let _ = cleanup(GFPGAN_PATH, "GFP");
         }
     } else {
-        println!(
-            "{} File was not ready...",
-            Utc::now() //TODO: fix this sleep shit
-        );
+        println!("{} File was not ready...", Utc::now());
 
+        //TODO: fix this sleep shit
         std::thread::sleep(std::time::Duration::from_secs(5)); // #BADHAX
 
         let _ = return_file(
@@ -255,4 +256,12 @@ async fn return_file(
             ESRGAN_PATH,
         );
     }
+}
+
+pub(crate) fn read_token_txt(p: String) -> Result<String, std::io::Error> {
+    let contents = match fs::read_to_string(p) {
+        Ok(it) => it,
+        Err(err) => return Err(err),
+    };
+    Ok(contents)
 }
