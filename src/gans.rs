@@ -71,7 +71,7 @@ const UPSCALE_FACTOR: u64 = 4;
 
 //
 // ----------------------GFPGAN--------------------------
-pub fn run_gfpgan() -> anyhow::Result<bool> {
+pub fn run_gfpgan(job: String) -> anyhow::Result<bool> {
     // runs GFPGAN on the images in path GFPGANPATH/inputs/whole_images which is where the bot will automatically download them to
     /*  Usage: python inference_gfpgan.py -i inputs/whole_imgs -o results -v 1.3 -s 2 [options]...
     -h                   show this help
@@ -86,12 +86,14 @@ pub fn run_gfpgan() -> anyhow::Result<bool> {
     -aligned             Input are aligned faces
     -ext                 Image extension. Options: auto | jpg | png, auto means using the same extension as inputs. Default: auto
     */
+
+    let job = format!("inputs/whole_imgs/{}", job);
     println!("{} QUEUED a restore.", Utc::now());
     let python = Command::new("python")
         .current_dir(GFPGAN_PATH)
         .arg("inference_gfpgan.py")
         .arg("-i") // input:
-        .arg("inputs/whole_imgs")
+        .arg(job)
         .arg("-o") // output:
         .arg("results")
         .arg("-v") // version:

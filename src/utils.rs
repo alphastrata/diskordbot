@@ -78,7 +78,6 @@ pub async fn process_downloadables(
     workhandle: &mut WorkHandle,
 ) {
     for attachment in &message.attachments {
-        let mut return_permission = false;
         let filename = attachment.filename.clone();
 
         // Confirm we're working somewhere we're supposed to be
@@ -110,7 +109,6 @@ pub async fn process_downloadables(
                     if check_attachment_and_download(message, &photo, &filename, &content)
                         .unwrap_or(false)
                     {
-                        // TODO: add to worklist.
                         // Acknowledge download
                         let _ = message
                             .reply_mention(
@@ -127,18 +125,15 @@ pub async fn process_downloadables(
                             *workhandle.available.lock().unwrap() = false;
                             //DEBUG:
                             println!(
-                                "{} Queue at: {}",
+                                "{} Jobs in Queue: {}",
                                 Utc::now(),
                                 workhandle.worklist.lock().unwrap().len()
                             );
                         }
 
                         if message.content.contains("restore") {
-                            // check workflag
-                            //check_queue(worklist)
-                            *workhandle.available.lock().unwrap() = false;
-                            workhandle.worklist.lock().unwrap().push(filename.clone());
-                            if gans::run_gfpgan().expect("Failed to run GFPGAN") {
+                            let top_job = workhandle.worklist.lock().unwrap().pop().unwrap();
+                            if gans::run_gfpgan(top_job).expect("Failed to run GFPGAN") {
                                 *workhandle.available.lock().unwrap() = true;
                                 workhandle.worklist.lock().unwrap().pop();
                             }
