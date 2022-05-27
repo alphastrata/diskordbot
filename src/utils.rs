@@ -121,27 +121,31 @@ pub async fn process_downloadables(
                                 ),
                             )
                             .await;
-                        // NOTE: Design decision to push the locks etc into these helpers to keep things clean
-                        workhandle.worklist.lock().unwrap().push(filename.clone());
-                        *workhandle.available.lock().unwrap() = false;
+                        // NOTE: explicitly creating a scope here to allow the compiler to handle unlock for us
+                        {
+                            workhandle.worklist.lock().unwrap().push(filename.clone());
+                            *workhandle.available.lock().unwrap() = false;
+                            //DEBUG:
+                            println!(
+                                "{} Queue at: {}",
+                                Utc::now(),
+                                workhandle.worklist.lock().unwrap().len()
+                            );
+                        }
 
-                        // TODO: check if we're working via the workflag
-                        // Run some Gans
-                        if message.content.contains("superres") {
-                            // check workflag
-                            //gans::run_esrgan(gans::Model::X4plus).expect("Failed to run ESRGAN");
-                            continue;
-                        } else if message.content.contains("restore") {
+                        if message.content.contains("restore") {
                             // check workflag
                             //check_queue(worklist)
-
+                            *workhandle.available.lock().unwrap() = false;
+                            workhandle.worklist.lock().unwrap().push(filename.clone());
                             if gans::run_gfpgan().expect("Failed to run GFPGAN") {
-                                return_permission = true;
+                                *workhandle.available.lock().unwrap() = true;
+                                workhandle.worklist.lock().unwrap().pop();
                             }
                         } else {
                             return;
                         };
-                        if return_permission {
+                        if *workhandle.available.lock().unwrap() {
                             let restored_imgs =
                                 format!("{}results/restored_imgs/{}", GFPGAN_PATH, filename);
 
