@@ -6,6 +6,36 @@ use serenity::model::channel::Message;
 use serenity::model::id::ChannelId;
 use std::fs;
 use std::path::Path;
+use std::sync::{Arc, Mutex};
+
+// TODO: mutex this bad boy and set it to on when we're running a gan, if the .output() call on the gan returns a 0 we succeded, if the file has been returned we can flip this back over
+pub struct WorkHandle {
+    pub(crate) available: Arc<Mutex<bool>>,
+    pub(crate) worklist: Arc<Mutex<Vec<String>>>,
+}
+
+impl WorkHandle {
+    /// Initialises the work handle, with an empty worklist and availability set to true
+    pub fn init() -> WorkHandle {
+        let mut available = Arc::new(Mutex::new(true));
+        let mut worklist = Arc::new(Mutex::new(Vec::new()));
+        WorkHandle {
+            available,
+            worklist,
+        }
+    }
+
+    fn check_all_work_completed(&mut self) -> bool {
+        let worklist = self.worklist.lock().unwrap();
+        let availability = *self.available.lock().unwrap();
+        if worklist.len() == 0 && availability {
+            return true;
+        }
+        println!("Worklist len: {:?}", worklist.len());
+        println!("Availability: {:?}", availability);
+        false
+    }
+}
 
 #[allow(non_snake_case)]
 pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, context: &Context) {
@@ -30,6 +60,7 @@ pub async fn process_downloadables(
     MAXIMUM_INPUT_RESOLUTION: u64,
     GFPGAN_PATH: &str,
     ESRGAN_PATH: &str,
+    workhandle: &mut WorkHandle,
 ) {
     for attachment in &message.attachments {
         let filename = attachment.filename.clone();
@@ -63,6 +94,7 @@ pub async fn process_downloadables(
                     if check_attachment_and_download(message, &photo, &filename, &content)
                         .unwrap_or(false)
                     {
+                        // Acknowledge download
                         let _ = message
                             .reply_mention(
                                 &context,
@@ -72,9 +104,50 @@ pub async fn process_downloadables(
                                 ),
                             )
                             .await;
+                        // NOTE: explicitly creating a scope here to allow the compiler to handle unlock for us
+                        {
+                            workhandle.worklist.lock().unwrap().push(filename.clone());
+                            *workhandle.available.lock().unwrap() = false;
+                            //DEBUG:
+                            println!(
+                                "{} Jobs in Queue: {}",
+                                Utc::now(),
+                                workhandle.worklist.lock().unwrap().len()
+                            );
+                        }
+                        if message.content.contains("superres") {
+                            todo!();
+                        }
+
+                        if message.content.contains("restore") {
+                            let top_job = workhandle.worklist.lock().unwrap().pop().unwrap();
+                            if gans::run_gfpgan(top_job).expect("Failed to run GFPGAN") {
+                                *workhandle.available.lock().unwrap() = true;
+                                workhandle.worklist.lock().unwrap().pop();
+                            }
+                        } else {
+                            return;
+                        };
+                        if *workhandle.available.lock().unwrap() {
+                            let restored_imgs =
+                                format!("{}results/restored_imgs/{}", GFPGAN_PATH, filename);
+
+                            // Get it back to them
+                            return_file(
+                                vec![&restored_imgs[..]], // NOTE: this is pretty nasty ...
+                                message.channel_id,
+                                &filename,
+                                context,
+                                message,
+                                GFPGAN_PATH,
+                                ESRGAN_PATH,
+                                workhandle,
+                            )
+                            .await;
+                        }
                     }
                     if message.content.contains("restore") {
-                        gans::run_gfpgan().expect("Failed to run GFPGAN");
+                        gans::run_gfpgan(filename.clone()).expect("Failed to run GFPGAN");
                     } else {
                         return;
                     };
@@ -91,6 +164,7 @@ pub async fn process_downloadables(
                         message,
                         GFPGAN_PATH,
                         ESRGAN_PATH,
+                        workhandle,
                     )
                     .await;
                 }
@@ -150,23 +224,28 @@ fn check_attachment_and_download(
 }
 
 #[allow(non_snake_case)]
-fn cleanup(model_path: &str, gan: &str) -> anyhow::Result<()> {
+fn cleanup(model_path: &str, gan: &str, workhandle: &mut WorkHandle) -> anyhow::Result<()> {
+    //NOTE: clearing out the worklist will need to happen before this cleanup is called
+    //TODO:
+    //check_worklist_is_empty && avaiablity is true
     // cleanup by removing all downloaded files
-    match gan {
-        "ESR" => {
-            let inputs = format!("{}inputs/inputs/", model_path);
-            let results = format!("{}results/results/", model_path);
-            let _ = remove_all(inputs);
-            let _ = remove_all(results);
-        }
-        "GFP" => {
-            let inputs = format!("{}inputs/whole_imgs", model_path);
-            let results = format!("{}results/restored_imgs", model_path);
-            let _ = remove_all(inputs);
-            let _ = remove_all(results);
-        }
-        _ => (),
-    };
+    if workhandle.check_all_work_completed() {
+        match gan {
+            "ESR" => {
+                let inputs = format!("{}inputs/inputs/", model_path);
+                let results = format!("{}results/results/", model_path);
+                let _ = remove_all(inputs);
+                let _ = remove_all(results);
+            }
+            "GFP" => {
+                let inputs = format!("{}inputs/whole_imgs", model_path);
+                let results = format!("{}results/restored_imgs", model_path);
+                let _ = remove_all(inputs);
+                let _ = remove_all(results);
+            }
+            _ => (),
+        };
+    }
 
     Ok(())
 }
@@ -191,6 +270,7 @@ async fn return_file(
     message: &Message,
     GFPGAN_PATH: &str,
     ESRGAN_PATH: &str,
+    workhandle: &mut WorkHandle,
 ) {
     // return the user's uploaded file to them restored
     let photo = format!("{}results/restored_imgs/{}", GFPGAN_PATH, filename);
@@ -204,9 +284,9 @@ async fn return_file(
             .await;
         println!("{} FINISHED! response sent!\n", Utc::now());
         if message.content.contains("superres") {
-            let _ = cleanup(ESRGAN_PATH, "ESER");
+            let _ = cleanup(ESRGAN_PATH, "ESER", workhandle);
         } else {
-            let _ = cleanup(GFPGAN_PATH, "GFP");
+            let _ = cleanup(GFPGAN_PATH, "GFP", workhandle);
         }
     } else {
         println!("{} File was not ready...", Utc::now());
@@ -221,6 +301,7 @@ async fn return_file(
             message,
             GFPGAN_PATH,
             ESRGAN_PATH,
+            workhandle,
         );
     }
 }

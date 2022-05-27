@@ -1,11 +1,13 @@
-//
-//╭━━━┳━━━┳━━━┳━━━┳━━━┳━╮╱╭┳╮╱╱╱╱╭╮
-//┃╭━╮┃╭━━┫╭━╮┃╭━╮┃╭━╮┃┃╰╮┃┃┃╱╱╱╭╯╰╮
-//┃┃╱╰┫╰━━┫╰━╯┃┃╱╰┫┃╱┃┃╭╮╰╯┃╰━┳━┻╮╭╯
-//┃┃╭━┫╭━━┫╭━━┫┃╭━┫╰━╯┃┃╰╮┃┃╭╮┃╭╮┃┃
-//┃╰┻━┃┃╱╱┃┃╱╱┃╰┻━┃╭━╮┃┃╱┃┃┃╰╯┃╰╯┃╰╮
-//╰━━━┻╯╱╱╰╯╱╱╰━━━┻╯╱╰┻╯╱╰━┻━━┻━━┻━╯
-//
+/*
+
+╭━━━┳━━━┳━━━┳━━━┳━━━┳━╮╱╭┳╮╱╱╱╱╭╮
+┃╭━╮┃╭━━┫╭━╮┃╭━╮┃╭━╮┃┃╰╮┃┃┃╱╱╱╭╯╰╮
+┃┃╱╰┫╰━━┫╰━╯┃┃╱╰┫┃╱┃┃╭╮╰╯┃╰━┳━┻╮╭╯
+┃┃╭━┫╭━━┫╭━━┫┃╭━┫╰━╯┃┃╰╮┃┃╭╮┃╭╮┃┃
+┃╰┻━┃┃╱╱┃┃╱╱┃╰┻━┃╭━╮┃┃╱┃┃┃╰╯┃╰╯┃╰╮
+╰━━━┻╯╱╱╰╯╱╱╰━━━┻╯╱╰┻╯╱╰━┻━━┻━━┻━╯
+
+*/
 const GFPGAN_BOT_ID: u64 = 889476441253761044; // These are harmless and unique, there is no danger in making them public.
 const MAXIMUM_INPUT_RESOLUTION: u64 = 2560;
 
@@ -44,6 +46,7 @@ impl EventHandler for Handler {
             return;
         }
 
+        let mut workhandle = utils::WorkHandle::init();
         let _ = utils::process_downloadables(
             &message,
             &context,
@@ -51,6 +54,7 @@ impl EventHandler for Handler {
             MAXIMUM_INPUT_RESOLUTION,
             GFPGAN_PATH,
             ESRGAN_PATH,
+            &mut workhandle,
         )
         .await;
 
