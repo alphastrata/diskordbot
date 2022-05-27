@@ -28,7 +28,7 @@ pub fn run_gfpgan(job: String) -> anyhow::Result<bool> {
     -ext                 Image extension. Options: auto | jpg | png, auto means using the same extension as inputs. Default: auto
     */
 
-    let output = format!(".{}results/restored_imgs/{}", GFPGAN_PATH, job);
+    let output = format!("results");
     let job = format!("inputs/whole_imgs/{}", job);
     println!("{} QUEUED a restore.", Utc::now());
     let python = Command::new("python")
