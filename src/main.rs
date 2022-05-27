@@ -1,23 +1,24 @@
 /*
-     ___     __            __        __
- ___/ (_)__ / /_____  ____/ /  ___  / /_
-/ _  / (_-</  '_/ _ \/ __/ _ \/ _ \/ __/
-\_,_/_/___/_/\_\\___/_/ /_.__/\___/\__/
+
+╭━━━┳━━━┳━━━┳━━━┳━━━┳━╮╱╭┳╮╱╱╱╱╭╮
+┃╭━╮┃╭━━┫╭━╮┃╭━╮┃╭━╮┃┃╰╮┃┃┃╱╱╱╭╯╰╮
+┃┃╱╰┫╰━━┫╰━╯┃┃╱╰┫┃╱┃┃╭╮╰╯┃╰━┳━┻╮╭╯
+┃┃╭━┫╭━━┫╭━━┫┃╭━┫╰━╯┃┃╰╮┃┃╭╮┃╭╮┃┃
+┃╰┻━┃┃╱╱┃┃╱╱┃╰┻━┃╭━╮┃┃╱┃┃┃╰╯┃╰╯┃╰╮
+╰━━━┻╯╱╱╰╯╱╱╰━━━┻╯╱╰┻╯╱╰━┻━━┻━━┻━╯
 
 */
-const GFPGAN_BOT_ID: u64 = 889476441253761044;
+const GFPGAN_BOT_ID: u64 = 889476441253761044; // These are harmless and unique, there is no danger in making them public.
 const MAXIMUM_INPUT_RESOLUTION: u64 = 2560;
 
 const GFPGAN_PATH: &str = "./GFPGAN/";
-const ESRGAN_PATH: &str = "./ESRGAN/";
+const ESRGAN_PATH: &str = "./ESRGAN/"; //NOTE: not in use
 
 mod gans;
 mod utils;
 
 use chrono::Utc;
 use std::env;
-#[allow(unused_imports)]
-use std::sync::{Arc, Mutex};
 
 struct Handler;
 
@@ -69,7 +70,7 @@ impl EventHandler for Handler {
 #[tokio::main]
 async fn main() {
     let key = "DISCORD_TOKEN";
-    // read the token from client_secret.txt
+    // read the bot's token from client_secret.txt (excluded in .gitignore)
     let client_secret_path = "client_secret.txt";
     let token =
         utils::read_token_txt(client_secret_path.trim().to_string()).expect("Unable to read token");
