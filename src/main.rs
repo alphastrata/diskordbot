@@ -40,12 +40,18 @@ use serenity::{
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, context: Context, message: Message) {
+        //We only care about @imbot
         if !&message.content.contains(&GFPGAN_BOT_ID.to_string()) {
             println!("{} Skipping, no work required.", Utc::now(),);
             return;
         }
 
         let mut workhandle = utils::WorkHandle::init();
+
+        if message.content.contains("help") {
+            utils::greeter_and_helper(&context, &message).await;
+        }
+
         let _ = utils::run(
             &message,
             &context,

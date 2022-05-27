@@ -4,6 +4,7 @@ use serenity::client::Context;
 use serenity::model::channel::Attachment;
 use serenity::model::channel::Message;
 use serenity::model::id::ChannelId;
+use serenity::utils::colours::roles::GREEN;
 use std::fs;
 use std::path::Path;
 use std::sync::{Arc, Mutex};
@@ -35,6 +36,22 @@ impl WorkHandle {
         println!("Availability: {:?}", availability);
         false
     }
+}
+
+pub async fn greeter_and_helper(context: &Context, message: &Message) {
+    let _ = message
+            .reply_mention(
+                &context,
+                format!( r#"
+                I'm a discord bot to restore and upres images.
+                To use me upload a photo to this server and in the attached message to that upload either:
+                @imbot restore
+                or, 
+                @imbot superres
+                Note: That superres images can be HUGE so if both you and the person who invited me to this channel are NOT NITRO subscribers you'll never get your image back.
+                ..My developer is probaly not going to make a fix for that, sorry. "#),
+            )
+            .await;
 }
 
 #[allow(non_snake_case)]
