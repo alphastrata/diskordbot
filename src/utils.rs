@@ -45,11 +45,11 @@ pub async fn greeter_and_helper(context: &Context, message: &Message) {
                 format!( r#"
                 I'm a discord bot to restore and upres images.
                 To use me upload a photo to this server and in the attached message to that upload either:
-                @imbot restore
+                `@imbot restore`
                 or, 
-                @imbot superres
+                `@imbot superres`
                 Note: That superres images can be HUGE so if both you and the person who invited me to this channel are NOT NITRO subscribers you'll never get your image back.
-                ..My developer is probaly not going to make a fix for that, sorry. "#),
+                _...My developer is probaly not going to make a fix for that, sorry._"#),
             )
             .await;
 }
