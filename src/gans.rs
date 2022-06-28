@@ -35,7 +35,7 @@ pub fn run_esrgan(model: Model) -> anyhow::Result<()> {
         X4plusAnime => "RealESRGAN_x4plus_anime_6B.pth",
         _ => "RealESRNet_x4plus .pth",
     };
-    let python = Command::new("python3")
+    let python = Command::new("python3.9")
         .current_dir("/home/jer/Documents/ESRGAN")
         .arg("inference_realesrgan.py")
         .arg("--model_path")
@@ -53,7 +53,7 @@ pub fn run_gfpgan() -> anyhow::Result<()> {
     // runs GFPGAN on the images in its path .../inputs/whole_images/
     println!("{} QUEUED a restore.", Utc::now());
     //python inference_gfpgan.py --upscale 2 --test_path inputs/whole_imgs --save_root results
-    let python = Command::new("python3")
+    let python = Command::new("python3.9")
         .current_dir("/home/jer/Documents/GFPGAN")
         .arg("inference_gfpgan.py")
         .arg("--upscale")

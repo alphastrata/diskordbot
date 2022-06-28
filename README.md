@@ -1,10 +1,10 @@
 //
-//╭━━━┳━━━┳━━━┳━━━┳━━━┳━╮╱╭┳╮╱╱╱╱╭╮
-//┃╭━╮┃╭━━┫╭━╮┃╭━╮┃╭━╮┃┃╰╮┃┃┃╱╱╱╭╯╰╮
-//┃┃╱╰┫╰━━┫╰━╯┃┃╱╰┫┃╱┃┃╭╮╰╯┃╰━┳━┻╮╭╯
-//┃┃╭━┫╭━━┫╭━━┫┃╭━┫╰━╯┃┃╰╮┃┃╭╮┃╭╮┃┃
-//┃╰┻━┃┃╱╱┃┃╱╱┃╰┻━┃╭━╮┃┃╱┃┃┃╰╯┃╰╯┃╰╮
-//╰━━━┻╯╱╱╰╯╱╱╰━━━┻╯╱╰┻╯╱╰━┻━━┻━━┻━╯
+//╭━━━┳━━━┳━━━┳━━━┳━━━┳━╮╱╭^ ┳╮╱╱╱╱╭╮
+//┃╭━╮┃╭━━┫╭━╮┃╭━╮┃╭━╮┃┃╰╮┃| ┃┃╱╱╱╭╯╰╮
+//┃┃╱╰┫╰━━┫╰━╯┃┃╱╰┫┃╱┃┃╭╮╰╯|/┃╰━┳━┻╮╭╯
+//┃┃╭━┫╭━━┫╭━━┫┃╭━┫╰━╯┃┃╰╮┃|/┃╭╮┃╭╮┃┃
+//┃╰┻━┃┃╱╱┃┃╱╱┃╰┻━┃╭━╮┃┃╱┃┃|/┃╰╯┃╰╯┃╰╮
+//╰━━━┻╯╱╱╰╯╱╱╰━━━┻╯╱╰┻╯╱╰━|/┻━━┻━━┻━╯
 //
 A discord bot for GFPGAN
 
@@ -31,3 +31,5 @@ A discord bot for GFPGAN
 - [] currently two files sharing a filename will prevent the bot from downloading... edgecasey but shouldhandle.
 - [] no progress feedback is given... edgecasey as the smaller, shittier, older images which this GFPGAN is actually good at working on take less than a second on my rig...
 - [] need to implement a queue, currently spamming the bot will make it crash #cozpythoncozcuda
+- [] error handling is... non-existant.
+- [] can this be broken out into something like app logic -> match (all the capablilities...)

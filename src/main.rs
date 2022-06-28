@@ -17,8 +17,6 @@ mod utils;
 
 use chrono::Utc;
 use std::env;
-#[allow(unused_imports)]
-use std::sync::{Arc, Mutex};
 
 struct Handler;
 
@@ -69,10 +67,9 @@ impl EventHandler for Handler {
 async fn main() {
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    let mut _worklist: Vec<String>;
     let mut client = Client::builder(token)
         .event_handler(Handler)
-        .application_id(889476441253761044)
+        .application_id(GFPGAN_BOT_ID)
         .await
         .expect("Error creating client");
 

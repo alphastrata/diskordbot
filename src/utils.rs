@@ -6,12 +6,12 @@ use serenity::model::channel::Message;
 use serenity::model::id::ChannelId;
 use std::fs;
 use std::path::Path;
-use std::sync::{Arc, Mutex};
+// use std::sync::{Arc, Mutex};
 
-enum Workflag {
-    Working,
-    Available,
-}
+// enum Workflag {
+//     Working,
+//     Available,
+// }
 
 #[allow(non_snake_case)]
 pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, context: &Context) {
@@ -27,20 +27,6 @@ pub async fn remote_kill_triggered(message: &Message, GFPGAN_BOT_ID: &u64, conte
         let _ = message.reply_mention(&context, " You killed me...").await;
         panic!();
     }
-}
-/*
-pub async fn check_queue(workflag: Workflag, worklist: Arc<Mutex<Vec<String>>>, newjob: String) {
-is newjob in worklist?
-   match workflag {
-       Workflag::Working => worklist.lock().unwrap().append(newjob),
-       Workflag::Available => {//TODO: run process}
-   };
-are we working?
-   todo!();
-}
-*/
-fn update_queue(worklist: &Vec<String>) {
-    todo!();
 }
 #[allow(non_snake_case)] // Coz it complains about the const variables -- which by convention are uppercase?
 pub async fn process_downloadables(
@@ -99,12 +85,13 @@ pub async fn process_downloadables(
                         // Run some Gans
                         if message.content.contains("superres") {
                             // check workflag
-                            gans::run_esrgan(gans::Model::X4plus).expect("Failed to run ESRGAN");
+                            let _ = gans::run_esrgan(gans::Model::X4plus)
+                                .expect("Failed to run ESRGAN");
                         } else if message.content.contains("restore") {
                             // check workflag
                             //check_queue(worklist)
 
-                            gans::run_gfpgan().expect("Failed to run GFPGAN");
+                            let _ = gans::run_gfpgan().expect("Failed to run GFPGAN");
                         } else {
                             return;
                         };
