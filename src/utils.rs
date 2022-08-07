@@ -6,6 +6,7 @@ use serenity::model::channel::Message;
 use serenity::model::id::ChannelId;
 use std::fs;
 use std::path::Path;
+
 // use std::sync::{Arc, Mutex};
 
 // enum Workflag {
@@ -43,8 +44,8 @@ pub async fn process_downloadables(
         // Confirm we're working somewhere we're supposed to be
         if check_permissions(message, *GFPGAN_BOT_ID).unwrap_or(false) {
             // Confirm we're dealing with and image, and of a suitably small size
-            let ismedia = attachment_is_image(&*attachment).unwrap_or(false); // or false because .txt files aren't media amongst others
-            assert_eq!(ismedia, true);
+            let ismedia = attachment_is_image(attachment).unwrap_or(false); // or false because .txt files aren't media amongst others
+            assert!(ismedia);
 
             if attachment.width > Some(MAXIMUM_INPUT_RESOLUTION)
                 || attachment.height > Some(MAXIMUM_INPUT_RESOLUTION)
@@ -61,7 +62,7 @@ pub async fn process_downloadables(
             };
 
             // Download files n get to work
-            let _ = match attachment.download().await {
+            match attachment.download().await {
                 Ok(content) => {
                     let photo = format!("{}inputs/whole_imgs/{}", GFPGAN_PATH, filename);
 
@@ -85,13 +86,12 @@ pub async fn process_downloadables(
                         // Run some Gans
                         if message.content.contains("superres") {
                             // check workflag
-                            let _ = gans::run_esrgan(gans::Model::X4plus)
-                                .expect("Failed to run ESRGAN");
+                            gans::run_esrgan(gans::Model::X4plus).expect("Failed to run ESRGAN");
                         } else if message.content.contains("restore") {
                             // check workflag
                             //check_queue(worklist)
 
-                            let _ = gans::run_gfpgan().expect("Failed to run GFPGAN");
+                            gans::run_gfpgan().expect("Failed to run GFPGAN");
                         } else {
                             return;
                         };
@@ -155,7 +155,7 @@ fn check_attachment_and_download(
         );
         return Ok(false);
     } else {
-        let _ = fs::write(photo, content.clone())?;
+        fs::write(photo, content)?;
         println!();
         println!("{} DOWNLOADED:{:#?}", Utc::now(), filename);
         println!("{} USER:{}", Utc::now(), message.author);
@@ -192,7 +192,7 @@ fn remove_all(dir: String) -> anyhow::Result<()> {
         .into_iter()
         .filter_map(|e| e.ok()) // Should also check filetypes??...
         .map(|e| e.path())
-        .try_for_each(|p| fs::remove_file(p));
+        .try_for_each(|p| -> Result<(), std::io::Error> { fs::remove_file(p) });
 
     println!("{} CLEANED UP: {}", Utc::now(), dir);
     Ok(())

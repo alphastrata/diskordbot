@@ -2,13 +2,14 @@
 name = "diskordbot"
 version = "0.1.0"
 edition = "2021"
+descrition = "A discord bot that allows you to run some GAN's on a linux box that's running said bot."
 
 [dependencies]
-anyhow = "1.0.42"
-chrono = "0.4.19"
+anyhow = "*"
+chrono = "*"
 discord = { git = "https://github.com/SpaceManiac/discord-rs" }
-futures = "0.3.15"
-image = "0.23.14"
+futures = "*"
+image = "*"
 serenity = {version="*",  default-features = false, features = ["client", "gateway", "rustls_backend", "model", "unstable_discord_api"] }
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 

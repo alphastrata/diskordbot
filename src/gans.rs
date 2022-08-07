@@ -30,10 +30,10 @@ pub fn run_esrgan(model: Model) -> anyhow::Result<()> {
     #[allow(unused_must_use)]
     // as above, most of the models are not use, so we're silencing the compiler
     let model = match model {
-        X2plus => "RealESRGAN_x2plus.pth",
-        X4plus => "RealESRGAN_x4plus.pth",
-        X4plusAnime => "RealESRGAN_x4plus_anime_6B.pth",
-        _ => "RealESRNet_x4plus .pth",
+        Model::X2plus => "RealESRGAN_x2plus.pth",
+        Model::X4plus => "RealESRGAN_x4plus.pth",
+        Model::X4plusAnime => "RealESRGAN_x4plus_anime_6B.pth",
+        // _ => "RealESRNet_x4plus .pth",
     };
     let python = Command::new("python3.9")
         .current_dir("/home/jer/Documents/ESRGAN")
